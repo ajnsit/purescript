@@ -36,8 +36,9 @@ import qualified Data.Map as M
 
 import Control.Monad
 
+import System.Directory (getCurrentDirectory)
 import System.Exit
-import System.Process
+import System.Process (readProcessWithExitCode)
 import System.FilePath
 import System.IO
 import System.IO.UTF8 (readUTF8File)
@@ -149,7 +150,10 @@ assertCompiles supportModules supportExterns supportForeigns inputFiles outputFi
         process <- findNodeProcess
         let entryPoint = modulesDir </> "index.js"
         writeFile entryPoint "require('Main').main()"
-        result <- traverse (\node -> readProcessWithExitCode node [entryPoint] "") process
+        result <- forM process $ \node -> do
+          cwd <- getCurrentDirectory
+          let esm = cwd </> "tests" </> "support" </> "node_modules" </> "esm"
+          readProcessWithExitCode node ["--require", esm, entryPoint] ""
         hPutStrLn outputFile $ "\n" <> takeFileName (last inputFiles) <> ":"
         case result of
           Just (ExitSuccess, out, err)
