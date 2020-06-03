@@ -69,6 +69,11 @@ literals = mkPattern' match'
     , return $ emit "}"
     ]
   match (Var _ ident) = return $ emit ident
+  match (VariableIntroduction _ ident (Just (Function _ Nothing args body))) = mconcat <$> sequence
+    [ return $ emit $ "function " <> ident <> "(" <> (intercalate "," args) <> ") "
+    , prettyPrintJS' body
+    ]
+
   match (VariableIntroduction _ ident value) = mconcat <$> sequence
     [ return $ emit $ "var " <> ident
     , maybe (return mempty) (fmap (emit " = " <>) . prettyPrintJS') value
