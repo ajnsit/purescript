@@ -360,6 +360,8 @@ matchMember stmt
   , JSIdentifier _ name <- var
   , JSVarInit _ decl <- varInit
   = Just (False, name, decl)
+  | JSFunction ann1 nameIdent@(JSIdentName _ name) ann2 args ann3 body _ <- stmt
+  = Just (False, name, JSFunctionExpression ann1 nameIdent ann2 args ann3 body)
   -- exports.foo = expr; exports["foo"] = expr;
   | JSAssignStatement e (JSAssign _) decl _ <- stmt
   , Just name <- accessor e
