@@ -70,8 +70,6 @@ moduleToCoreFn env (A.Module modSS coms mn decls (Just exps)) =
     [NonRec (ssA ss) name (exprToCoreFn ss com Nothing e)]
   declToCoreFn (A.BindingGroupDeclaration ds) =
     [Rec . NEL.toList $ fmap (\(((ss, com), name), _, e) -> ((ssA ss, name), exprToCoreFn ss com Nothing e)) ds]
-  declToCoreFn (A.TypeClassDeclaration sa@(ss, _) name _ supers _ members) =
-    [NonRec (ssA ss) (properToIdent name) $ mkTypeClassConstructor sa supers members]
   declToCoreFn _ = []
 
   -- | Desugars expressions from AST to CoreFn representation.
@@ -239,7 +237,6 @@ externToCoreFn _ = Nothing
 exportToCoreFn :: A.DeclarationRef -> [Ident]
 exportToCoreFn (A.TypeRef _ _ (Just dctors)) = fmap properToIdent dctors
 exportToCoreFn (A.ValueRef _ name) = [name]
-exportToCoreFn (A.TypeClassRef _ name) = [properToIdent name]
 exportToCoreFn (A.TypeInstanceRef _ name) = [name]
 exportToCoreFn _ = []
 
