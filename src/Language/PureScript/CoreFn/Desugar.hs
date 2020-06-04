@@ -70,8 +70,9 @@ moduleToCoreFn env (A.Module modSS coms mn decls (Just exps)) =
     [NonRec (ssA ss) name (exprToCoreFn ss com Nothing e)]
   declToCoreFn (A.BindingGroupDeclaration ds) =
     [Rec . NEL.toList $ fmap (\(((ss, com), name), _, e) -> ((ssA ss, name), exprToCoreFn ss com Nothing e)) ds]
+  -- AJ: We do not generate code for class defs
   declToCoreFn (A.TypeClassDeclaration sa@(ss, _) name _ supers _ members) =
-    [NonRec (ssA ss) (properToIdent name) $ mkTypeClassConstructor sa supers members]
+    []
   declToCoreFn _ = []
 
   -- | Desugars expressions from AST to CoreFn representation.
@@ -112,6 +113,7 @@ moduleToCoreFn env (A.Module modSS coms mn decls (Just exps)) =
     let args = fmap (exprToCoreFn ss [] Nothing . snd) $ sortBy (compare `on` fst) vs
         ctor = Var (ss, [], Nothing, Just IsTypeClassConstructor) (fmap properToIdent name)
     in foldl (App (ss, com, Nothing, Nothing)) ctor args
+  -- AJ: These accessors can remain as it is for now
   exprToCoreFn ss com ty  (A.TypeClassDictionaryAccessor _ ident) =
     Abs (ss, com, ty, Nothing) (Ident "dict")
       (Accessor (ssAnn ss) (mkString $ runIdent ident) (Var (ssAnn ss) $ Qualified Nothing (Ident "dict")))
@@ -239,7 +241,8 @@ externToCoreFn _ = Nothing
 exportToCoreFn :: A.DeclarationRef -> [Ident]
 exportToCoreFn (A.TypeRef _ _ (Just dctors)) = fmap properToIdent dctors
 exportToCoreFn (A.ValueRef _ name) = [name]
-exportToCoreFn (A.TypeClassRef _ name) = [properToIdent name]
+-- AJ: Do not export type class names
+-- exportToCoreFn (A.TypeClassRef _ name) = [properToIdent name]
 exportToCoreFn (A.TypeInstanceRef _ name) = [name]
 exportToCoreFn _ = []
 

@@ -326,10 +326,9 @@ typeInstanceDictionaryDeclaration sa@(ss, _) name mn deps className tys decls =
             , let tyArgs = map (replaceAllTypeVars (zip (map fst typeClassArguments) tys)) suTyArgs
             ]
 
-      let props = Literal ss $ ObjectLiteral $ map (first mkString) (members ++ superclasses)
+      let dict = Literal ss $ ObjectLiteral $ map (first mkString) (members ++ superclasses)
           dictTy = foldl srcTypeApp (srcTypeConstructor (fmap (coerceProperName . dictSynonymName) className)) tys
           constrainedTy = quantify (foldr srcConstrainedType dictTy deps)
-          dict = TypeClassDictionaryConstructorApp className props
           result = ValueDecl sa name Private [] [MkUnguarded (TypedValue True dict constrainedTy)]
       return result
 
