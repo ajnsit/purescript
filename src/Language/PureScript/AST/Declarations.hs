@@ -808,7 +808,7 @@ data Expr
   -- An application of a typeclass dictionary constructor. The value should be
   -- an ObjectLiteral.
   --
-  | TypeClassDictionaryConstructorApp (Qualified (ProperName 'ClassName)) Expr
+  -- | TypeClassDictionaryConstructorApp (Qualified (ProperName 'ClassName)) Expr
   -- |
   -- A placeholder for a type class dictionary to be inserted later. At the end of type checking, these
   -- placeholders will be replaced with actual expressions representing type classes dictionaries which

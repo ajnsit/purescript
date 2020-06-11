@@ -107,12 +107,12 @@ moduleToCoreFn env (A.Module modSS coms mn decls (Just exps)) =
     exprToCoreFn ss com (Just ty) v
   exprToCoreFn ss com ty (A.Let w ds v) =
     Let (ss, com, ty, getLetMeta w) (concatMap declToCoreFn ds) (exprToCoreFn ss [] Nothing v)
-  exprToCoreFn ss com ty (A.TypeClassDictionaryConstructorApp name (A.TypedValue _ lit@(A.Literal _ (A.ObjectLiteral _)) _)) =
-    exprToCoreFn ss com ty (A.TypeClassDictionaryConstructorApp name lit)
-  exprToCoreFn ss com _ (A.TypeClassDictionaryConstructorApp name (A.Literal _ (A.ObjectLiteral vs))) =
-    let args = fmap (exprToCoreFn ss [] Nothing . snd) $ sortBy (compare `on` fst) vs
-        ctor = Var (ss, [], Nothing, Just IsTypeClassConstructor) (fmap properToIdent name)
-    in foldl (App (ss, com, Nothing, Nothing)) ctor args
+  -- exprToCoreFn ss com ty (A.TypeClassDictionaryConstructorApp name (A.TypedValue _ lit@(A.Literal _ (A.ObjectLiteral _)) _)) =
+  --   exprToCoreFn ss com ty (A.TypeClassDictionaryConstructorApp name lit)
+  -- exprToCoreFn ss com _ (A.TypeClassDictionaryConstructorApp name (A.Literal _ (A.ObjectLiteral vs))) =
+  --   let args = fmap (exprToCoreFn ss [] Nothing . snd) $ sortBy (compare `on` fst) vs
+  --       ctor = Var (ss, [], Nothing, Just IsTypeClassConstructor) (fmap properToIdent name)
+  --   in foldl (App (ss, com, Nothing, Nothing)) ctor args
   -- AJ: These accessors can remain as it is for now
   exprToCoreFn ss com ty  (A.TypeClassDictionaryAccessor _ ident) =
     Abs (ss, com, ty, Nothing) (Ident "dict")
@@ -215,7 +215,9 @@ findQualModules decls =
   -- Some instances are automatically solved and have their class dictionaries
   -- built inline instead of having a named instance defined and imported.
   -- We therefore need to import these constructors if they aren't already.
-  fqValues (A.TypeClassDictionaryConstructorApp c _) = getQual' c
+
+  -- AJ: HERE??
+  -- fqValues (A.TypeClassDictionaryConstructorApp c _) = getQual' c
   fqValues _ = []
 
   fqBinders :: A.Binder -> [ModuleName]
